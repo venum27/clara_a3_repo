@@ -1,151 +1,144 @@
-# Assignment 3 – Nested CLaRa: instruction tuning, the gap to the official code, ablations and a demo
+# Nested CLaRa – Assignment 3
 
-Team Black Box Vectors · CS 613 Natural Language Processing, IIT Gandhinagar
+**CS 613: Natural Language Processing, IIT Gandhinagar – Assignment 3 (final)**
+Team Black Box Vectors: Venugopala Rao Mallipuram, Atragada Venkata Naga Sai Ganesh, Dasari Lohith, Manemoni Sumanjali,
+Rayan Talukder, Sidda Divya, Swami Aryanathan, Vyomika Vasireddy
 
-Assignment 3 builds on our Assignment 2 code and trained models (nested memory tokens and a learned budget head for
-CLaRa, https://github.com/venum27/clara_a2_repo). Every A3 file is a **new standalone file**: it imports nothing from
-the A2 code, rebuilds the model exactly as `nclara/modeling.py` does, and reads and writes checkpoints in the A2
-format, so A2's `train_e2e.py`, `evaluate.py` and `diagnose_memory.py` work on A3 checkpoints unchanged.
+## Overview
 
-## Repository layout
+In Assignment 1 we reproduced CLaRa (He et al., 2025) at a small scale with Qwen2.5-0.5B and FLAN-T5-base. In
+Assignment 2 we extended it with nested memory tokens and a learned budget head that splits a fixed number of memory
+vectors across the retrieved documents. The A2 code and results are in
+[clara_a2_repo](https://github.com/venum27/clara_a2_repo).
 
-| Folder | What it holds |
-|---|---|
-| `code/` | All A3 code: the new standalone files and `scripts/13`–`17`. To run it, copy the contents of `code/` into the A2 project folder (see below) |
-| `runs/qwen/<dataset>/<run>/` | Per-run results of every A3 run: `results/` (eval.json, qa_predictions.json, diagnose.json), `results_big/`, and the settings and training logs of `scp/` and `e2e/` (`meta.json`, `train_log.json`); no model weights |
-| `logs/` | Training and evaluation logs of all A3 runs |
-| `tables/` | Summary tables (`a3_it_comparison.md`, `a3_ablations_2wiki.md`, `a3_ablations_2wiki_big.md`, ...) |
-| `screenshots/` | `demo/` (deployment demo, cases A–D), `appendix/` (execution steps 1–10), `comparison/` (comparison with a standard text RAG) |
-| `docs/` | Deployment section and reproduction appendix of the report (Word), and team members' write-ups |
-| `analysis/` | Team members' analyses |
+For Assignment 3 we followed up on the open questions from A2:
 
-**The A3 code runs inside the A2 project.** It calls A2's `train_e2e.py`, `evaluate.py`, `diagnose_memory.py` and
-`summarize.py`, reads A2's `data/` folder and starts from the trained A2 checkpoints. To reproduce: clone
-https://github.com/venum27/clara_a2_repo, put the A2 checkpoints under `runs/`, copy the contents of this repository's
-`code/` folder into it, and run the commands below from that folder.
+1. **Compression instruction tuning.** Official CLaRa has a middle training stage between SCP and E2E that we had
+   skipped. We added it to our nested pipeline in two versions: tuning both the compressor and the generator, and
+   tuning only the generator.
+2. **Why our pipeline beats the official code.** A2 found that our re-implementation scores 2–4 F1 above the official
+   CLaRa code but never tested why. We switched our model to the official learning rate, the official temperature
+   and the official SCP target, one at a time.
+3. **Hyperparameter ablation** of the budget head (entropy bonus and temperature).
+4. **A larger evaluation** of the ablations on 3,000 questions per dataset, since the 300-question set was too small
+   to separate 2–3 F1 differences.
+5. **A bug fix.** A2's straight-through top-k gives NaN at small temperatures (it picks the same document twice), so the
+   official temperature 0.02 could not be tested. `train_e2e_a3.py` fixes this.
+6. **Extra metrics** without retraining (F1 by question type, answer type and gold-passage rank).
+7. **A deployment demo** and a comparison with a standard text RAG using more metrics (ROUGE, containment).
 
-The deployment demo and the comparison with a standard text RAG are part of this repository (see "Deployment
-demo and comparison with a standard text RAG" below).
-
-## What is new in Assignment 3
-
-| | Experiment | Code |
-|---|---|---|
-| 1 | **Compression instruction tuning** – CLaRa's middle stage (between SCP and E2E), adapted to nested memory, in two variants: compressor + generator tuned, and generator only (compressor frozen) | `train_it_nested.py`, scripts 13 and 17 |
-| 2 | **Why our pipeline beats the official code** – our CLaRa re-implementation (fixed-16) with the official E2E learning rate, the official straight-through temperature, both, and the official SCP target | `train_e2e_a3.py`, `train_scp_allqa.py`, scripts 14 and 15 |
-| 3 | **Hyperparameter ablation of the budget head** – entropy bonus and straight-through temperature | script 14 |
-| 4 | **Larger evaluation** of all ablations on 3,000 questions | script 16 |
-| 5 | **Extra metrics without training** – F1 by question type, by answer type and by the rank of the first gold passage | `analyze_metrics.py` |
-| 6 | **Correction to A2** – A2's straight-through top-k returns NaN at small temperatures; fixed in `train_e2e_a3.py` | `train_e2e_a3.py` |
-| 7 | **Deployment demo** – a local Gradio app | `demo_app.py` |
-
-## Files
-
-| File | What it does |
-|---|---|
-| `train_it_nested.py` | Instruction tuning from an A2 nested SCP checkpoint: per training question the gold passages + BM25 distractors (4 in total, BM25 order); answer loss + 0.1 × MSE averaged over prefixes 4/8/16/32; `--train_compressor 0` tunes the generator only |
-| `train_e2e_a3.py` | A2's E2E stage with a NaN-safe straight-through top-k (picked documents masked with −∞); identical to `train_e2e.py` at temperature 0.5 |
-| `train_scp_allqa.py` | A2's SCP with the official target: the generator writes all QA pairs of a passage in one target (target limit 256 tokens); `--target perqa` reproduces A2's `train_scp.py` exactly |
-| `summarize_ablations.py` | Ablation table with paired bootstrap differences against the A2 baselines (`--results results_big` for the 3,000-question set) |
-| `compare_it.py` | Instruction tuning vs A2: answers, retrieval, memory diagnostic and compressor-only QA, averaged over seeds |
-| `analyze_metrics.py` | Extra metrics from saved predictions (no GPU) |
-| `demo_app.py` | Gradio demo: ranked candidates, the passages read, learned / uniform / top-heavy splits and their answers |
-| `pack_a3.py` | Zips the A3 code, tables, run results and logs (no model weights) into `~/a3_share.zip` |
-| `demo_app_compare.py` | The demo plus a standard text RAG row on every question, with ROUGE-L, containment, input size and time for every system |
-| `compare_rag_systems.py` | Scores all systems on the held-out questions with EM, F1, ROUGE-1/2/L and containment, paired against a standard text RAG |
-| `show_step_a3.py` | Prints the saved evidence of each step (logs and tables) for the execution screenshots |
-| `scripts/13_it_nested.sh` | Instruction tuning (compressor + generator) → E2E (rule splits and budget head) → evaluation → memory diagnostic |
-| `scripts/17_it_gen_only.sh` | The same with the compressor frozen |
-| `scripts/14_e2e_ablations.sh` | The 7 E2E-only ablations on 2Wiki (two jobs side by side on one GPU) |
-| `scripts/15_scp_allqa.sh` | Fixed-16 retrained with the official SCP target, then E2E and evaluation |
-| `scripts/16_big_eval_a3.sh` | Re-evaluates the ablation runs on 3,000 questions (no retraining) |
-
-Scripts 13 and 17 train the E2E stage with A2's `train_e2e.py` (exact at temperature 0.5, which they use); scripts 14 and 15 use `train_e2e_a3.py`, which is also correct at the official temperature 0.02. `show_step_a3.py` is shared separately (it is not inside `a3_share.zip`).
-
-## Requirements
-
-Same environment as Assignment 2 (Python 3.10, PyTorch 2.4, PEFT 0.20; our A3 runs used Transformers 4.46.3 – A2
-used 4.43.4). A3 starts from the trained A2 checkpoints, which are not in the GitHub repository:
-`runs/qwen/<dataset>/r2_nested_M32_all_e6_s42/scp` (nested compressor) and `runs/qwen/<dataset>/r2_fixed_M16_e6_s42/scp`
-(fixed-16), produced by A2's `scripts/07_round2.sh`. Data: A2's `data/` folder (including `<dataset>_evalbig.json`).
-
-## How to run
-
-From the project folder, in this order. Every script runs in the background, writes to `logs/`, skips steps that
-have already finished (so an interrupted run is simply started again) and keeps running after logout.
+## Repository structure
 
 ```
-./scripts/00_check_gpus.sh                               # which GPU is free
-GPUS=1 SEEDS=42,43,44 bash scripts/13_it_nested.sh       # instruction tuning, compressor + generator
-SEEDS=42,43,44 bash scripts/17_it_gen_only.sh            # instruction tuning, generator only
-bash scripts/14_e2e_ablations.sh                         # 7 E2E ablations (2Wiki, seed 42)
-bash scripts/15_scp_allqa.sh                             # official SCP target (2Wiki, seed 42)
-bash scripts/16_big_eval_a3.sh                           # ablations on 3,000 questions
+code/          A3 code (new standalone Python files) and code/scripts/ with the run scripts 13–17
+runs/          per-run results: eval.json, qa_predictions.json, diagnose.json, train logs (no model weights)
+logs/          training and evaluation logs
+tables/        summary tables of all experiments
+screenshots/   demo/ (deployment demo), appendix/ (execution steps 1–10), comparison/ (vs standard text RAG)
+docs/          deployment section and reproduction appendix of the report
+analysis/      analyses by team members
 ```
 
-Tables (seconds, no GPU):
+The A3 code is not a separate project – it runs inside the A2 project. It reuses A2's `train_e2e.py`,
+`evaluate.py`, `diagnose_memory.py` and `summarize.py`, A2's `data/` folder and the trained A2 checkpoints. None of the
+new files import anything from the A2 code, and they save checkpoints in the same format as A2.
+
+## Setup
+
+1. Clone [clara_a2_repo](https://github.com/venum27/clara_a2_repo) and set it up as described there.
+2. Put the trained A2 checkpoints under `runs/` (we start from `r2_nested_M32_all_e6_s42` and `r2_fixed_M16_e6_s42`).
+   They are not on GitHub because of their size.
+3. Copy everything inside this repo's `code/` folder into the A2 project folder.
+
+We ran everything on our lab server (2× NVIDIA L40S) with Python 3.10, PyTorch 2.4, PEFT 0.20 and Transformers 4.46.3.
+
+## Running the experiments
+
+From the A2 project folder. The scripts run in the background, write their logs to `logs/` and skip any step that has
+already finished, so an interrupted run can simply be started again.
 
 ```
-python3 compare_it.py --seeds 42,43,44                           # runs/a3_it_comparison.md
-python3 summarize_ablations.py --dataset 2wiki                   # runs/a3_ablations_2wiki.md
-python3 summarize_ablations.py --dataset 2wiki --results results_big   # runs/a3_ablations_2wiki_big.md
-python3 analyze_metrics.py                                       # runs/a3_metrics_results_big.md
-python3 pack_a3.py                                               # ~/a3_share.zip
-python3 show_step_a3.py 2                                        # evidence of step 2 (python3 show_step_a3.py lists all)
+./scripts/00_check_gpus.sh                            # check which GPU is free
+GPUS=1 SEEDS=42,43,44 bash scripts/13_it_nested.sh    # instruction tuning (compressor + generator)
+SEEDS=42,43,44 bash scripts/17_it_gen_only.sh         # instruction tuning (generator only)
+bash scripts/14_e2e_ablations.sh                      # 7 E2E ablations on 2Wiki
+bash scripts/15_scp_allqa.sh                          # official SCP target
+bash scripts/16_big_eval_a3.sh                        # ablations on 3,000 questions
 ```
 
-Approximate times on one shared L40S: instruction tuning about 18 min per dataset (about 10 min generator only); each
-E2E + evaluation + memory diagnostic 30–40 min; SCP with the official target about 50 min (6 epochs); each
-3,000-question evaluation 25–90 min, depending on how busy the GPU is. Each job needs a few GB of GPU memory
-(a 3,000-question evaluation about 10 GB). If a job stops with a CUDA out-of-memory error on the shared GPU, start the
-same script again, on the other GPU if needed (`GPU=1` or `GPUS=1`).
+The tables are built from the saved results in a few seconds (no GPU):
 
-The training files and `demo_app.py` have a `--tiny` option that runs on a tiny random model on the CPU (plumbing tests only).
+```
+python3 compare_it.py --seeds 42,43,44                                 # instruction tuning vs A2
+python3 summarize_ablations.py --dataset 2wiki --results results_big   # ablations (3,000 questions)
+python3 compare_rag_systems.py                                         # comparison with a standard text RAG
+python3 analyze_metrics.py                                             # extra metrics
+python3 show_step_a3.py 2                                              # print the evidence of one step
+```
 
-## Deployment demo and comparison with a standard text RAG
+On a shared L40S, instruction tuning took about 18 minutes per dataset (about 10 minutes for the generator-only
+version), each E2E training with evaluation 30–40 minutes, SCP with the official target about 45 minutes, and each
+3,000-question evaluation 25–90 minutes depending on how busy the GPU was.
 
-The demo (`code/demo_app.py`) runs the full pipeline for one held-out question on the GPU server and is opened from a laptop through an SSH tunnel; `code/demo_app_compare.py` adds a standard text RAG to every question. Screenshots: `screenshots/demo/` and `screenshots/comparison/`; the write-up is in `docs/A3_deployment_section_and_appendix.docx`.
+## Results
 
-### The systems compared
+All numbers are for Qwen2.5-0.5B with 64 memory vectors per question. The full tables are in `tables/`.
 
-All use Qwen2.5-0.5B-Instruct, the same held-out questions (300 per dataset) and 4 retrieved passages per question.
+**Instruction tuning** (3 seeds, 300 questions per dataset)
 
-| System | Retrieval | What the generator reads |
-|---|---|---|
-| **Standard text RAG** | BM25 top 4 | the 4 passages as raw text (about 500 tokens); base model with no training |
-| Official CLaRa code | its trained retriever | 16 memory vectors per passage (64 in total) |
-| Our CLaRa re-implementation (fixed-16) | trained query reasoner | 16 memory vectors per passage (64) |
-| Ours: nested memory + learned budget head | trained query reasoner | 64 memory vectors split by the learned head |
+- Tuning the compressor during instruction tuning breaks retrieval: on 2Wiki, hit@1 drops from about 68 to about 34.
+  The compressor's memory vectors are used both by the generator and by the retriever, and tuning them only for
+  answering ruins them for retrieval. In one seed, retrieval ended up below random.
+- Tuning only the generator keeps retrieval at the A2 level and gives small gains on HotpotQA (F1 +1.2, EM +1.6 to
+  +2.6). On 2Wiki the changes are within noise.
 
-### Results: compressed memory vs standard text RAG
+**Why we beat the official code** (3,000 questions, 2Wiki)
 
-300 questions per dataset; the nested model is averaged over 3 seeds. Scores in %. ROUGE is computed exactly like the
-`rouge-score` package (F-measure, no stemming; checked on 31,200 answer pairs).
+- The main reason is our 10× higher E2E learning rate. With the official learning rate, our model loses 2.4 F1
+  [−3.8, −1.0] of the 3.8 F1 gap and its retrieval drops to the official level.
+- The official temperature (0.02) is actually better than ours: +2.1 F1 [+1.0, +3.2]. This only works after the NaN fix.
+- The official SCP target makes no difference (−0.3 [−1.7, +1.1]).
+
+**Budget head**
+
+The learned split still performs the same as the uniform split (within ±0.8 F1 over 3 seeds, within ±0.3 on 3,000
+questions), and changing the entropy bonus or the temperature does not change this. The training logs explain why: the
+head's split entropy stays at about 2.56, which is the maximum for 13 possible splits, so the head never learns to
+prefer any split.
+
+**Comparison with a standard text RAG** (300 questions per dataset)
+
+For the deployment part we compared our system with a standard RAG pipeline: the same Qwen2.5-0.5B model without any
+training, reading BM25's top-4 passages as plain text. Besides EM and F1 we report ROUGE-2, ROUGE-L (computed like the
+`rouge-score` package) and containment (does the answer contain the gold answer).
 
 | Dataset | System | Input | EM | F1 | ROUGE-2 | ROUGE-L | Containment | Answer words |
 |---|---|---|---|---|---|---|---|---|
 | 2Wiki | Standard text RAG | 490 tokens | 15.7 | 23.5 | 17.6 | 23.5 | 33.7 | 8.1 |
 | 2Wiki | Official CLaRa code | 64 vectors | 32.3 | 34.2 | 22.4 | 34.3 | 32.3 | 2.4 |
-| 2Wiki | Ours: nested + budget head | 64 vectors | **34.9** | **39.5** | **23.8** | **39.6** | **36.3** | 2.5 |
-| HotpotQA | Standard text RAG | 528 tokens | 8.7 | **21.7** | **11.6** | **21.6** | **27.3** | 8.1 |
+| 2Wiki | Ours (A2, nested + budget head) | 64 vectors | 34.9 | 39.5 | 23.8 | 39.6 | 36.3 | 2.5 |
+| 2Wiki | Ours (A3, generator tuned) | 64 vectors | 34.2 | 37.6 | 22.6 | 37.7 | 35.1 | 2.5 |
+| HotpotQA | Standard text RAG | 528 tokens | 8.7 | 21.7 | 11.6 | 21.6 | 27.3 | 8.1 |
 | HotpotQA | Official CLaRa code | 64 vectors | 11.7 | 18.3 | 7.2 | 18.5 | 12.7 | 2.6 |
-| HotpotQA | Ours: nested + budget head | 64 vectors | **12.1** | 19.8 | 7.2 | 20.0 | 13.8 | 2.3 |
+| HotpotQA | Ours (A2, nested + budget head) | 64 vectors | 12.1 | 19.8 | 7.2 | 20.0 | 13.8 | 2.3 |
+| HotpotQA | Ours (A3, generator tuned) | 64 vectors | 14.7 | 21.0 | 8.6 | 21.2 | 16.3 | 2.3 |
 
-Paired against the text RAG over the same questions (95% intervals): on 2Wiki our system gains **+16.0 F1
-[+10.4, +21.5]** and **+16.1 ROUGE-L [+10.8, +21.6]** while reading about 8× less input; on HotpotQA F1 and ROUGE-L
-differ by less than the noise (−1.9 [−6.6, +2.6] and −1.6 [−6.4, +3.3]), and our EM is 3.4 points higher.
+On 2Wiki our models are clearly better than the text RAG (+14 to +16 F1, all significant) while reading about 8 times
+less input. On HotpotQA the F1 and ROUGE-L differences are within noise, but our A3 model has a significantly higher
+exact match (EM +6.0 [+1.1, +10.9]). The text RAG gives long answers (8 words on average against our 2–3), which is why
+it does better on the lenient metrics (containment, ROUGE-2) and worse on exact match. Keep in mind that our generator
+was trained on 1,000 training questions, while the text RAG is used zero-shot.
 
-The different metrics tell a consistent story about answer length. The untrained text RAG writes long answers
-(about 8 words against our 2.4), so it does better on the lenient metrics – containment and ROUGE-2 – and worse on
-exact match. Note that our generator was trained on 1,000 training questions while the text RAG is zero-shot, so
-part of the gap reflects task training and answer format, not only compression. `tables/a3_rag_comparison.md` has
-all systems, ROUGE-1 and the paired differences; run `compare_rag_systems.py` on the server to add the A3 model
-(instruction tuning of the generator).
+## Deployment demo
 
-### Running the demo
+The demo is a small Gradio app that runs on the lab server and is opened from a laptop through an SSH tunnel.
+`demo_app.py` shows, for one held-out question, the ranked candidate passages, the 4 passages the generator reads,
+how the memory budget is split (learned, uniform and top-heavy) and the answer for each split. `demo_app_compare.py`
+adds the standard text RAG next to it, with EM, F1, ROUGE-L, input size and time for every system. Screenshots are in
+`screenshots/demo/` and `screenshots/comparison/`.
 
-On the GPU server, in a separate environment (Gradio 6 needs `huggingface_hub` 1.x, which Transformers 4.46 does not
-support, so the versions are pinned):
+We installed Gradio in a separate environment so the training setup stays untouched. The versions are pinned because
+Gradio 6 needs `huggingface_hub` 1.x, which does not work with our Transformers version.
 
 ```
 python3 -m venv ~/demo_env --system-site-packages
@@ -153,50 +146,17 @@ python3 -m venv ~/demo_env --system-site-packages
 CUDA_VISIBLE_DEVICES=1 ~/demo_env/bin/python demo_app_compare.py
 ```
 
-On the laptop: `ssh -L 7860:localhost:7860 <user>@<server>` and open http://localhost:7860.
-Options: `--run runs/qwen/<dataset>/<run>` (a trained run folder with `e2e/`; default
-`runs/qwen/2wiki/r2_nested_M32_all_e6__learned_s42`), `--dataset hotpotqa`, `--port`, `--share`, and `--tiny`
-(a tiny random model on the CPU, for testing). The demo expects the project layout: `data/<dataset>_eval.json` and
-the trained runs under `runs/`. One question takes 0.1–0.8 s per system on an L40S.
-
-### Reproducing the comparison
-
-From the project folder (needs the saved `qa_predictions.json` of the runs; no GPU, a few seconds):
-
-```
-python3 compare_rag_systems.py                          # runs/a3_rag_comparison.md
-python3 compare_rag_systems.py --runs_dir results/runs  # on the A2 repo's saved results
-```
-
-The text-RAG answers come from the raw-text baseline that A2's `evaluate.py` saves with every evaluation
-(`preds["raw_bm25"]`); they are identical across all runs, as the base model is deterministic.
-
-## Results
-
-All tables are in `runs/` (and in `tables/` of the shared zip). Main findings (Qwen2.5-0.5B, 64 memory vectors):
-
-1. **Tuning the compressor during instruction tuning breaks retrieval.** On 2Wiki the trained query reasoner's hit@1
-   falls from about 68 to about 34 (3 seeds), because the same memory vectors are read by the generator and compared
-   by the retriever; before E2E the tuned compressor ranks 2Wiki passages below chance (hit@1 15.7 vs about 25), and in
-   one seed (2Wiki, seed 44, rule splits) training ended with hit@4 at 54.6%, also below chance.
-2. **Tuning only the generator keeps retrieval at the A2 level** and gives small gains: HotpotQA F1 +1.2 and EM +1.6 to
-   +2.6 (3 seeds); on 2Wiki the changes are within noise.
-3. **The 10× higher E2E learning rate is the main reason our pipeline beats the official code** (3,000 questions):
-   with the official learning rate our fixed-16 model loses 2.4 F1 [−3.8, −1.0] of the 3.8-point gap and its
-   retrieval falls to the official level. The official temperature 0.02 is better than ours (+2.1 F1 [+1.0, +3.2]);
-   the official SCP target makes no difference (−0.3 [−1.7, +1.1]).
-4. **The learned budget split still matches the uniform split**: learned − uniform stays within ±0.8 F1 in the 3-seed
-   comparisons and within ±0.3 on 3,000 questions (the larger single-seed gaps on 300 questions, −1.8 and +1.0,
-   vanish on 3,000), and no entropy-bonus or temperature setting changes F1 by more than 0.6. The training logs show
-   why: with the entropy bonus the head's split entropy stays at about 2.56, the maximum for 13 splits, so it never
-   prefers any split.
+Then on the laptop: `ssh -L 7860:localhost:7860 <user>@<server>` and open http://localhost:7860. By default the demo
+loads our A2 budget-head model on 2Wiki; `--run runs/qwen/<dataset>/<run>` loads another trained run. One question
+takes well under a second per system.
 
 ## Notes
 
-- `train_e2e_a3.py` was checked against A2's `train_e2e.py` on the same seed at temperature 0.5: identical training
-  logs and weights equal up to floating-point rounding. With temperature 0.02, A2's code picks the same document
-  twice and returns NaN (silently with rule splits, a crash with the budget head); the fixed version trains normally.
-- `train_scp_allqa.py --target perqa` reproduced A2's `train_scp.py` exactly in our CPU test (same seed, identical weights); the official all-QA targets average
-  91 tokens (maximum 164), so A2's 96-token target limit would have cut many of them.
-- With the compressor frozen, the query reasoner starts from the A2 weights; its before-E2E hit@1 (39.0 on HotpotQA,
-  25.7 vs A2's 27.0 on 2Wiki) differs only by numerical noise from the newer Transformers version.
+- We checked `train_e2e_a3.py` against A2's `train_e2e.py` with the same seed at temperature 0.5: the training logs
+  are identical and the weights agree up to floating-point rounding.
+- With the official SCP target, a passage's QA pairs together are 91 tokens on average (164 at most). A2's 96-token
+  target limit would have cut many of them, so `train_scp_allqa.py` uses 256.
+- Our A3 runs used Transformers 4.46.3, while A2 used 4.43.4. This explains a tiny difference in one before-training
+  retrieval number (2Wiki hit@1 25.7 vs 27.0 with the same frozen compressor).
+- Every training script and both demos have a `--tiny` option that runs on a tiny random model on the CPU, which we
+  used to test the code before the real runs.

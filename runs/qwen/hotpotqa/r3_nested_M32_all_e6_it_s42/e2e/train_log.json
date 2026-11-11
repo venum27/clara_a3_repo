@@ -1,0 +1,62 @@
+{
+  "args": {
+    "run_dir": "runs/qwen/hotpotqa/r3_nested_M32_all_e6_it_s42",
+    "dataset": "hotpotqa",
+    "data_dir": "data",
+    "k": 4,
+    "total_budget": 64,
+    "train_alloc": "mixed",
+    "train_totals": "",
+    "budget_samples": 2,
+    "budget_lr": 0.001,
+    "entropy_coef": 0.02,
+    "r_score": 16,
+    "tau": 0.5,
+    "epochs": 3,
+    "lr": 5e-05,
+    "amp": "bf16",
+    "seed": 42,
+    "tiny": false
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.4817690083653283,
+      "train_hit@k": 82.66533066132264,
+      "train_all_gold@k": 30.360721442885772
+    },
+    {
+      "epoch": 2,
+      "loss": 1.039100630258637,
+      "train_hit@k": 86.07214428857715,
+      "train_all_gold@k": 39.478957915831664
+    },
+    {
+      "epoch": 3,
+      "loss": 0.7140386268973431,
+      "train_hit@k": 88.07615230460922,
+      "train_all_gold@k": 40.18036072144289
+    }
+  ],
+  "minutes": 10.954178659121196,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.0024178392277187386,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.001994552012161655,
+      "lora_B_nonzero": "96/96"
+    }
+  }
+}

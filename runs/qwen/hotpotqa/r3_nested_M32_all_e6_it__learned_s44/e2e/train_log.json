@@ -1,0 +1,74 @@
+{
+  "args": {
+    "run_dir": "runs/qwen/hotpotqa/r3_nested_M32_all_e6_it__learned_s44",
+    "dataset": "hotpotqa",
+    "data_dir": "data",
+    "k": 4,
+    "total_budget": 64,
+    "train_alloc": "learned",
+    "train_totals": "32,64",
+    "budget_samples": 2,
+    "budget_lr": 0.001,
+    "entropy_coef": 0.02,
+    "r_score": 16,
+    "tau": 0.5,
+    "epochs": 3,
+    "lr": 5e-05,
+    "amp": "bf16",
+    "seed": 44,
+    "tiny": false
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.4872525299733406,
+      "train_hit@k": 81.76352705410822,
+      "train_all_gold@k": 30.561122244488978,
+      "split_entropy": 2.4980781766957416,
+      "top1_share_of_budget": 0.25087675350701405,
+      "avg_budget_gold_docs": 12.067796610169491,
+      "avg_budget_other_docs": 12.073841866945315
+    },
+    {
+      "epoch": 2,
+      "loss": 1.0194820365449158,
+      "train_hit@k": 87.7755511022044,
+      "train_all_gold@k": 39.57915831663327,
+      "split_entropy": 2.555757152054735,
+      "top1_share_of_budget": 0.25212925851703405,
+      "avg_budget_gold_docs": 11.904012588512982,
+      "avg_budget_other_docs": 11.774347666299155
+    },
+    {
+      "epoch": 3,
+      "loss": 0.6696069729401781,
+      "train_hit@k": 89.37875751503006,
+      "train_all_gold@k": 42.38476953907816,
+      "split_entropy": 2.5582727537843173,
+      "top1_share_of_budget": 0.24480210420841683,
+      "avg_budget_gold_docs": 11.770342205323194,
+      "avg_budget_other_docs": 11.96936869630183
+    }
+  ],
+  "minutes": 13.785703575611114,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.002425861389245697,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.002216427063654974,
+      "lora_B_nonzero": "96/96"
+    }
+  }
+}

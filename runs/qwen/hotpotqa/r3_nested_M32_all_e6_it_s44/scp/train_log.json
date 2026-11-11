@@ -1,0 +1,55 @@
+{
+  "args": {
+    "dataset": "hotpotqa",
+    "data_dir": "data",
+    "runs_dir": "runs",
+    "src_run": null,
+    "name": "r3_nested_M32_all_e6_it",
+    "seeds": "42,43,44",
+    "k": 4,
+    "doc_order": "bm25",
+    "epochs": 1,
+    "lr": 0.0001,
+    "lambda_mse": null,
+    "train_compressor": 1,
+    "generator_init": "scp",
+    "n_train": null,
+    "amp": "bf16",
+    "overwrite": false,
+    "tiny": false
+  },
+  "src": "runs/qwen/hotpotqa/r2_nested_M32_all_e6_s42/scp",
+  "prefix_set": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "ce_by_prefix": {
+        "4": 2.264166422448175,
+        "8": 2.2487877343894676,
+        "16": 2.2401762874016606,
+        "32": 2.258743642707636
+      },
+      "mse": 0.3820146860103151
+    }
+  ],
+  "minutes": 17.490071507294974,
+  "changed_vs_src": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 192
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 0
+    }
+  }
+}

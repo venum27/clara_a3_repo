@@ -1,0 +1,45 @@
+{
+  "backbone": "qwen",
+  "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+  "max_mem": 32,
+  "lora_r": 16,
+  "max_doc_tokens": 256,
+  "max_query_tokens": 64,
+  "max_target_tokens": 96,
+  "rescale_memory": false,
+  "stage": "e2e",
+  "mode": "nested",
+  "prefix_set": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "nest_loss": "all",
+  "lambda_mse": 0.1,
+  "dataset": "2wiki",
+  "seed": 42,
+  "it": {
+    "src": "runs/qwen/2wiki/r2_nested_M32_all_e6_s42/scp",
+    "k": 4,
+    "doc_order": "bm25",
+    "epochs": 1,
+    "lr": 0.0001,
+    "lambda_mse": 0.1,
+    "train_compressor": 1,
+    "generator_init": "scp",
+    "n_questions": 1000,
+    "seed": 42
+  },
+  "k": 4,
+  "total_budget": 64,
+  "train_alloc": "learned",
+  "r_score": 16,
+  "tau": 0.5,
+  "train_totals": [
+    32,
+    64
+  ],
+  "budget_samples": 2,
+  "entropy_coef": 0.02
+}

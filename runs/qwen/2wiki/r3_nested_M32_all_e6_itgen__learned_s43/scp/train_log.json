@@ -1,0 +1,55 @@
+{
+  "args": {
+    "dataset": "2wiki",
+    "data_dir": "data",
+    "runs_dir": "runs",
+    "src_run": null,
+    "name": "r3_nested_M32_all_e6_itgen",
+    "seeds": "42",
+    "k": 4,
+    "doc_order": "bm25",
+    "epochs": 1,
+    "lr": 0.0001,
+    "lambda_mse": null,
+    "train_compressor": 0,
+    "generator_init": "scp",
+    "n_train": null,
+    "amp": "bf16",
+    "overwrite": false,
+    "tiny": false
+  },
+  "src": "runs/qwen/2wiki/r2_nested_M32_all_e6_s42/scp",
+  "prefix_set": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "ce_by_prefix": {
+        "4": 1.5769950783210225,
+        "8": 1.4880114902016939,
+        "16": 1.5043882571988507,
+        "32": 1.5171463707832153
+      },
+      "mse": 0.4456577297821641
+    }
+  ],
+  "minutes": 9.484605558713277,
+  "changed_vs_src": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 0
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 0
+    }
+  }
+}

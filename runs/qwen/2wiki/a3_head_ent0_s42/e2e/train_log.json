@@ -1,0 +1,74 @@
+{
+  "args": {
+    "run_dir": "runs/qwen/2wiki/a3_head_ent0_s42",
+    "dataset": "2wiki",
+    "data_dir": "data",
+    "k": 4,
+    "total_budget": 64,
+    "train_alloc": "learned",
+    "train_totals": "32,64",
+    "budget_samples": 2,
+    "budget_lr": 0.001,
+    "entropy_coef": 0.0,
+    "r_score": 16,
+    "tau": 0.5,
+    "epochs": 3,
+    "lr": 5e-05,
+    "amp": "bf16",
+    "seed": 42,
+    "tiny": false
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.590902387168724,
+      "train_hit@k": 94.0,
+      "train_all_gold@k": 45.3,
+      "split_entropy": 1.4119374444088817,
+      "top1_share_of_budget": 0.2484375,
+      "avg_budget_gold_docs": 12.285367334547663,
+      "avg_budget_other_docs": 12.262643433914151
+    },
+    {
+      "epoch": 2,
+      "loss": 1.1198107615722839,
+      "train_hit@k": 96.8,
+      "train_all_gold@k": 54.3,
+      "split_entropy": 0.7160386715084315,
+      "top1_share_of_budget": 0.25675,
+      "avg_budget_gold_docs": 12.017650303364588,
+      "avg_budget_other_docs": 11.853680841335162
+    },
+    {
+      "epoch": 3,
+      "loss": 0.8635658011715641,
+      "train_hit@k": 98.1,
+      "train_all_gold@k": 57.6,
+      "split_entropy": 0.4934940448306855,
+      "top1_share_of_budget": 0.252625,
+      "avg_budget_gold_docs": 12.019323671497585,
+      "avg_budget_other_docs": 12.117922321010763
+    }
+  ],
+  "minutes": 14.524078941345214,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.002274491457435281,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.00231929474543766,
+      "lora_B_nonzero": "96/96"
+    }
+  }
+}

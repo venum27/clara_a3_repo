@@ -1,0 +1,22 @@
+{
+  "backbone": "qwen",
+  "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+  "max_mem": 32,
+  "lora_r": 16,
+  "max_doc_tokens": 256,
+  "max_query_tokens": 64,
+  "max_target_tokens": 96,
+  "rescale_memory": false,
+  "stage": "scp",
+  "mode": "nested",
+  "prefix_set": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "nest_loss": "all",
+  "lambda_mse": 0.1,
+  "dataset": "2wiki",
+  "seed": 42
+}

@@ -1,0 +1,122 @@
+{
+  "args": {
+    "dataset": "2wiki",
+    "data_dir": "data",
+    "run_dir": "runs/qwen/2wiki/a3_fixed16_allqa_s42",
+    "target": "allqa",
+    "mode": "fixed",
+    "max_mem": 16,
+    "prefix_set": "4,8,16,32",
+    "nest_loss": "sample",
+    "epochs": 6,
+    "lr": 0.0001,
+    "lambda_mse": 0.1,
+    "mse_detach_doc": 1,
+    "lora_r": 16,
+    "max_doc_tokens": 256,
+    "max_target_tokens": null,
+    "max_paraphrase_chars": 400,
+    "rescale_memory": 0,
+    "amp": "bf16",
+    "seed": 42,
+    "tiny": false
+  },
+  "prefix_set": [
+    16
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.9569829871165334
+      },
+      "ce_by_target": {
+        "allqa": 1.6200390972593832,
+        "para": 2.2936778423174697
+      },
+      "mse": 0.8144484260055803
+    },
+    {
+      "epoch": 2,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.5153637747887982
+      },
+      "ce_by_target": {
+        "allqa": 1.2526304537551642,
+        "para": 1.7779029100714836
+      },
+      "mse": 0.3110501318123336
+    },
+    {
+      "epoch": 3,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.3059203576523803
+      },
+      "ce_by_target": {
+        "allqa": 1.0889065769451434,
+        "para": 1.522773743843204
+      },
+      "mse": 0.3306472913725319
+    },
+    {
+      "epoch": 4,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.1539457005515776
+      },
+      "ce_by_target": {
+        "allqa": 0.968881839930394,
+        "para": 1.3388727807879712
+      },
+      "mse": 0.3767436301531942
+    },
+    {
+      "epoch": 5,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.0377348326959144
+      },
+      "ce_by_target": {
+        "allqa": 0.8732477389661782,
+        "para": 1.2021003542942905
+      },
+      "mse": 0.38302683648472574
+    },
+    {
+      "epoch": 6,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 0.9245330177178664
+      },
+      "ce_by_target": {
+        "allqa": 0.7781300050696942,
+        "para": 1.0708278241482647
+      },
+      "mse": 0.37495525895778
+    }
+  ],
+  "minutes": 43.444150523344675,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.008848768288964604,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.010129672029341402,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "0/96"
+    }
+  }
+}

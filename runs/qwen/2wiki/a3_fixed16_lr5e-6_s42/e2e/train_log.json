@@ -1,0 +1,62 @@
+{
+  "args": {
+    "run_dir": "runs/qwen/2wiki/a3_fixed16_lr5e-6_s42",
+    "dataset": "2wiki",
+    "data_dir": "data",
+    "k": 4,
+    "total_budget": 64,
+    "train_alloc": "uniform",
+    "train_totals": "",
+    "budget_samples": 2,
+    "budget_lr": 0.001,
+    "entropy_coef": 0.02,
+    "r_score": 16,
+    "tau": 0.5,
+    "epochs": 3,
+    "lr": 5e-06,
+    "amp": "bf16",
+    "seed": 42,
+    "tiny": false
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 2.241972451559035,
+      "train_hit@k": 76.3,
+      "train_all_gold@k": 19.4
+    },
+    {
+      "epoch": 2,
+      "loss": 1.6685778823654691,
+      "train_hit@k": 84.3,
+      "train_all_gold@k": 30.5
+    },
+    {
+      "epoch": 3,
+      "loss": 1.4870616492271655,
+      "train_hit@k": 87.2,
+      "train_all_gold@k": 35.7
+    }
+  ],
+  "minutes": 10.634640204906464,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.0004685471957131857,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.0003805895194917949,
+      "lora_B_nonzero": "96/96"
+    }
+  }
+}

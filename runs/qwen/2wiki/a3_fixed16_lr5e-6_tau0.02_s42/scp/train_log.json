@@ -1,0 +1,97 @@
+{
+  "args": {
+    "backbone": "qwen",
+    "dataset": "2wiki",
+    "data_dir": "data",
+    "run_dir": "runs/qwen/2wiki/r2_fixed_M16_e6_s42",
+    "mode": "fixed",
+    "max_mem": 16,
+    "prefix_set": "4,8,16,32",
+    "nest_loss": "sample",
+    "epochs": 6,
+    "lr": 0.0001,
+    "lambda_mse": 0.1,
+    "mse_detach_doc": 1,
+    "lora_r": 16,
+    "max_doc_tokens": 256,
+    "max_paraphrase_chars": 400,
+    "rescale_memory": 0,
+    "amp": "bf16",
+    "seed": 42,
+    "tiny": false
+  },
+  "prefix_set": [
+    16
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 2.7006275019858754
+      },
+      "mse": 1.0741979332716844
+    },
+    {
+      "epoch": 2,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 2.1682217707016203
+      },
+      "mse": 0.3692259664165055
+    },
+    {
+      "epoch": 3,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.719451056183187
+      },
+      "mse": 0.3311609086900832
+    },
+    {
+      "epoch": 4,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.3924271994177897
+      },
+      "mse": 0.3133651980141249
+    },
+    {
+      "epoch": 5,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 1.1495401007693673
+      },
+      "mse": 0.3173759802096132
+    },
+    {
+      "epoch": 6,
+      "steps": 1353,
+      "ce_by_prefix": {
+        "16": 0.9500772387435397
+      },
+      "mse": 0.33594180626870773
+    }
+  ],
+  "minutes": 163.6334915717443,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.008457968771284814,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.009054765010880532,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "0/96"
+    }
+  }
+}

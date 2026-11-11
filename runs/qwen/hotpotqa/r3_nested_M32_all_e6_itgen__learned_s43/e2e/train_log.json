@@ -1,0 +1,74 @@
+{
+  "args": {
+    "run_dir": "runs/qwen/hotpotqa/r3_nested_M32_all_e6_itgen__learned_s43",
+    "dataset": "hotpotqa",
+    "data_dir": "data",
+    "k": 4,
+    "total_budget": 64,
+    "train_alloc": "learned",
+    "train_totals": "32,64",
+    "budget_samples": 2,
+    "budget_lr": 0.001,
+    "entropy_coef": 0.02,
+    "r_score": 16,
+    "tau": 0.5,
+    "epochs": 3,
+    "lr": 5e-05,
+    "amp": "bf16",
+    "seed": 43,
+    "tiny": false
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "loss": 1.5512782611032,
+      "train_hit@k": 89.67935871743487,
+      "train_all_gold@k": 39.879759519038075,
+      "split_entropy": 2.504150007569599,
+      "top1_share_of_budget": 0.25144038076152303,
+      "avg_budget_gold_docs": 12.31554524361949,
+      "avg_budget_other_docs": 12.133382734346053
+    },
+    {
+      "epoch": 2,
+      "loss": 1.0376592889109002,
+      "train_hit@k": 92.68537074148297,
+      "train_all_gold@k": 48.99799599198397,
+      "split_entropy": 2.559271437849454,
+      "top1_share_of_budget": 0.2597695390781563,
+      "avg_budget_gold_docs": 12.343705799151344,
+      "avg_budget_other_docs": 12.047323506594259
+    },
+    {
+      "epoch": 3,
+      "loss": 0.7097452208628441,
+      "train_hit@k": 92.88577154308618,
+      "train_all_gold@k": 51.503006012024045,
+      "split_entropy": 2.5549702329004935,
+      "top1_share_of_budget": 0.25438376753507014,
+      "avg_budget_gold_docs": 12.474670367800138,
+      "avg_budget_other_docs": 12.007840062720502
+    }
+  ],
+  "minutes": 13.879059064388276,
+  "delta_vs_start": {
+    "compressor": {
+      "tensors": 192,
+      "changed": 0,
+      "mean_abs_delta": 0.0,
+      "lora_B_nonzero": "96/96"
+    },
+    "generator": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.0024121586677872324,
+      "lora_B_nonzero": "96/96"
+    },
+    "query_reasoner": {
+      "tensors": 192,
+      "changed": 192,
+      "mean_abs_delta": 0.002128391665433865,
+      "lora_B_nonzero": "96/96"
+    }
+  }
+}
